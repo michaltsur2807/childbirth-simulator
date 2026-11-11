@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>סימולטור לידה בחירום - הדרכת אחיות ומערך קליני</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Heebo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --danger: #ef4444;
+      --danger-dark: #b91c1c;
+      --danger-light: #fee2e2;
+      --success: #10b981;
+      --success-dark: #047857;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-dark: #b45309;
+      --warning-light: #fef3c7;
+      --slate-950: #030712;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-300: #cbd5e1;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.07);
+      --shadow-lg: 0 16px 36px -6px rgba(15, 23, 42, 0.12);
+      --font-body: 'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-heading: 'Heebo', var(--font-body);
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: radial-gradient(circle at 10% 20%, #e0f2fe 0%, #f1f5f9 45%, #e2e8f0 100%);
+      color: var(--slate-800);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Disclaimer Banner */
+    .disclaimer-banner {
+      background: #080c14;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      padding: 0.45rem 1rem;
+      border-bottom: 1px solid #1e293b;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      line-height: 1.4;
+    }
+
+    .disclaimer-banner strong {
+      color: #cbd5e1;
+    }
+
+    .disclaimer-link {
+      color: #38bdf8;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 45%, #0369a1 100%);
+      color: white;
+      padding: 1.15rem 1.5rem;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.28);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .pulse-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 0 16px rgba(14, 165, 233, 0.45);
+    }
+
+    .logo-titles h1 {
+      font-family: var(--font-heading);
+      font-size: 1.38rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+
+    .logo-titles p {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      margin-top: -2px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #cbd5e1;
+      padding: 0.55rem 1.2rem;
+      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-btn.active {
+      background: #0284c7;
+      color: white;
+      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.45);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1040px;
+      width: 100%;
+      margin: 1.75rem auto;
+      padding: 0 1rem 3rem 1rem;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .intro-card {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-top: 5px solid var(--primary);
+      position: relative;
+    }
+
+    .intro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .intro-title {
+      font-family: var(--font-heading);
+      font-size: 1.85rem;
+      font-weight: 900;
+      color: var(--slate-900);
+      margin-bottom: 0.75rem;
+      line-height: 1.25;
+    }
+
+    .intro-text {
+      color: var(--slate-600);
+      font-size: 1.05rem;
+      max-width: 860px;
+      margin-bottom: 1.5rem;
+    }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .stat-pill {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.blue { background: #e0f2fe; color: #0284c7; }
+    .stat-icon.emerald { background: #d1fae5; color: #059669; }
+    .stat-icon.rose { background: #fee2e2; color: #dc2626; }
+    .stat-icon.amber { background: #fef3c7; color: #d97706; }
+
+    .stat-info .label {
+      font-size: 0.8rem;
+      color: var(--slate-600);
+      font-weight: 600;
+    }
+
+    .stat-info .value {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--slate-800);
+    }
+
+    /* Simulation Settings Box */
+    .sim-options-box {
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .toggle-label-title {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--slate-900);
+    }
+
+    .toggle-label-desc {
+      font-size: 0.82rem;
+      color: var(--slate-600);
+    }
+
+    .nurse-name-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .nurse-name-input {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      border: 1.5px solid var(--slate-300);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .nurse-name-input:focus {
+      border-color: var(--primary);
+    }
+
+    .start-btn {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: white;
+      border: none;
+      padding: 0.95rem 2.4rem;
+      font-size: 1.15rem;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.2s ease;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    }
+
+    .start-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Simulator HUD */
+    .sim-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.25rem;
+      gap: 1.25rem;
+      border: 1px solid var(--slate-200);
+      flex-wrap: wrap;
+    }
+
+    .hud-progress-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .hud-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--slate-600);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-bar-bg {
+      height: 10px;
+      background: var(--slate-100);
+      border-radius: 10px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #10b981);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    /* Timer HUD */
+    .timer-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--slate-800);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-badge.urgent {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #b91c1c;
+      animation: pulseUrgent 1s infinite;
+    }
+
+    @keyframes pulseUrgent {
+      50% { transform: scale(1.05); }
+    }
+
+    .hud-score-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      border-radius: 10px;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--slate-700);
+    }
+
+    /* Case Card */
+    .case-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 2.25rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      position: relative;
+    }
+
+    .case-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      gap: 1rem;
+      border-bottom: 1px solid var(--slate-100);
+      padding-bottom: 0.9rem;
+    }
+
+    .case-tag-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .case-tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .tag-clinical { background: #e0f2fe; color: #0369a1; }
+    .tag-critical { background: #fee2e2; color: #b91c1c; }
+    .tag-protocol { background: #fef3c7; color: #b45309; }
+
+    /* ========================================================
+       ADVANCED L&D TELEMETRY MONITOR STRIP (PHILIPS/GE STYLE)
+       ======================================================== */
+    .telemetry-monitor {
+      background: #080c14;
+      border-radius: 14px;
+      border: 1px solid #1e293b;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 4px 16px rgba(0,0,0,0.15);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .telemetry-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .live-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #34d399;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: blinkDot 1.2s infinite;
+    }
+
+    @keyframes blinkDot {
+      50% { opacity: 0.3; transform: scale(0.85); }
+    }
+
+    .monitor-model-tag {
+      color: #64748b;
+      font-size: 0.72rem;
+    }
+
+    /* Waveform + Pods Container */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 140px repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.85rem;
+      align-items: center;
+    }
+
+    /* Animated Heartbeat SVG Canvas */
+    .pulse-wave-pod {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0.35rem 0.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .pulse-svg {
+      width: 100%;
+      height: 38px;
+    }
+
+    .pulse-path {
+      stroke: #00f59b;
+      stroke-width: 2.2;
+      fill: none;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: ecgSweep 2.2s linear infinite;
+    }
+
+    @keyframes ecgSweep {
+      0% { stroke-dashoffset: 200; opacity: 1; }
+      85% { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 0.2; }
+    }
+
+    /* Telemetry Data Pods */
+    .tele-pod {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 0.55rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      transition: all 0.2s ease;
+    }
+
+    .tele-pod-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .tele-pod-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+    }
+
+    .tele-pod-unit {
+      font-size: 0.65rem;
+      color: #64748b;
+    }
+
+    .tele-pod-value {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Telemetry color schemes */
+    .pod-fhr .tele-pod-value { color: #00f59b; text-shadow: 0 0 10px rgba(0, 245, 155, 0.3); }
+    .pod-toco .tele-pod-value { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+    .pod-bp .tele-pod-value { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+    .pod-spo2 .tele-pod-value { color: #818cf8; text-shadow: 0 0 10px rgba(129, 140, 248, 0.3); }
+
+    .tele-pod.alert-danger {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .tele-pod.alert-danger .tele-pod-value {
+      color: #ff3366 !important;
+      text-shadow: 0 0 12px rgba(255, 51, 102, 0.6);
+      animation: alertPulse 1.2s infinite;
+    }
+
+    @keyframes alertPulse {
+      50% { opacity: 0.45; }
+    }
+
+    /* Heart beat animation on heart icon */
+    .beating-heart {
+      display: inline-block;
+      animation: heartBeat 0.9s ease infinite;
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      14% { transform: scale(1.25); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.25); }
+      70% { transform: scale(1); }
+    }
+
+    .case-narrative {
+      font-size: 1.24rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      line-height: 1.55;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Options */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.95rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .option-btn {
+      background: var(--slate-50);
+      border: 2px solid var(--slate-200);
+      padding: 1.15rem 1.4rem;
+      border-radius: var(--radius-md);
+      text-align: right;
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      cursor: pointer;
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: #f0f9ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.1);
+    }
+
+    .option-btn:active:not(:disabled) {
+      transform: scale(0.985);
+    }
+
+    .option-btn:focus-visible {
+      outline: 3px solid #38bdf8;
+      outline-offset: 2px;
+    }
+
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    .option-prefix {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: white;
+      border: 1px solid var(--slate-300);
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--slate-600);
+      flex-shrink: 0;
+    }
+
+    .option-text {
+      flex: 1;
+    }
+
+    .option-btn.correct {
+      border-color: var(--success);
+      background: var(--success-light);
+      color: #065f46;
+    }
+
+    .option-btn.correct .option-prefix {
+      background: var(--success);
+      color: white;
+      border-color: var(--success);
+    }
+
+    .option-btn.wrong {
+      border-color: var(--danger);
+      background: var(--danger-light);
+      color: #991b1b;
+    }
+
+    .option-btn.wrong .option-prefix {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    /* Rationale Box */
+    .rationale-box {
+      margin-top: 1.25rem;
+      padding: 1.65rem;
+      border-radius: var(--radius-md);
+      display: none;
+      animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-right: 6px solid transparent;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .rationale-box.success {
+      background: #ecfdf5;
+      border-right-color: var(--success);
+      border: 1px solid #a7f3d0;
+      border-right-width: 6px;
+    }
+
+    .rationale-box.danger {
+      background: #fff1f2;
+      border-right-color: var(--danger);
+      border: 1px solid #fecdd3;
+      border-right-width: 6px;
+    }
+
+    .rationale-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.18rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .rationale-box.success .rationale-header { color: var(--success-dark); }
+    .rationale-box.danger .rationale-header { color: var(--danger-dark); }
+
+    .rationale-body {
+      color: var(--slate-800);
+      font-size: 1.04rem;
+      line-height: 1.6;
+    }
+
+    .clinical-pearl {
+      margin-top: 0.95rem;
+      padding: 0.85rem 1.1rem;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 9px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--slate-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    /* Clinical SVG Diagram Container */
+    .clinical-diagram-card {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      background: white;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .diagram-svg-wrap {
+      flex-shrink: 0;
+      width: 130px;
+      height: 95px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .diagram-desc {
+      flex: 1;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: var(--slate-700);
+    }
+
+    .diagram-desc strong {
+      color: var(--slate-900);
+      display: block;
+      margin-bottom: 3px;
+      font-size: 0.96rem;
+    }
+
+    .action-bar {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .next-btn {
+      background: var(--slate-900);
+      color: white;
+      border: none;
+      padding: 0.9rem 2.1rem;
+      border-radius: 10px;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .next-btn:hover {
+      background: #0284c7;
+      transform: translateY(-2px);
+    }
+
+    .next-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Report Card */
+    .report-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--slate-200);
+      position: relative;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      border-radius: var(--radius-lg);
+    }
+
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
+    }
+
+    .score-circle.excellent { background: linear-gradient(135deg, #10b981, #059669); }
+    .score-circle.good { background: linear-gradient(135deg, #0284c7, #0369a1); }
+    .score-circle.need-review { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    .score-num {
+      font-family: var(--font-heading);
+      font-size: 2.75rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .score-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .report-title {
+      font-family: var(--font-heading);
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .report-msg {
+      color: var(--slate-600);
+      font-size: 1.1rem;
+      max-width: 650px;
+      margin: 0 auto 2rem;
+      text-align: center;
+    }
+
+    .report-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-cert {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      border: none;
+      padding: 0.85rem 1.8rem;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.05rem;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+      transition: all 0.2s;
+    }
+
+    .btn-cert:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(5, 150, 105, 0.45);
+    }
+
+    .btn-retry-mistakes {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 0.85rem 1.6rem;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.05rem;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-retry-mistakes:hover {
+      background: #d97706;
+      transform: translateY(-2px);
+    }
+
+    .report-breakdown {
+      text-align: right;
+      background: var(--slate-50);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      border: 1px solid var(--slate-200);
+    }
+
+    .breakdown-title {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--slate-900);
+      margin-bottom: 1rem;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--slate-200);
+      font-size: 0.95rem;
+      gap: 1rem;
+    }
+
+    .breakdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-item .q-txt {
+      font-weight: 600;
+      color: var(--slate-800);
+      flex: 1;
+    }
+
+    .breakdown-item .q-res {
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .q-res.pass { color: var(--success); }
+    .q-res.fail { color: var(--danger); }
+
+    /* Protocols Pocket Guide Tab */
+    .protocol-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .protocol-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--slate-200);
+      border-top: 4px solid var(--primary);
+      transition: transform 0.2s ease;
+    }
+
+    .protocol-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .protocol-card.danger { border-top-color: var(--danger); }
+    .protocol-card.warning { border-top-color: var(--warning); }
+    .protocol-card.emerald { border-top-color: var(--success); }
+    .protocol-card.purple { border-top-color: #8b5cf6; }
+
+    .protocol-card h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .protocol-card ul {
+      list-style-position: inside;
+      color: var(--slate-700);
+      font-size: 0.98rem;
+    }
+
+    .protocol-card li {
+      margin-bottom: 0.65rem;
+      line-height: 1.5;
+    }
+
+    .badge-do-not {
+      display: inline-block;
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-left: 6px;
+    }
+
+    .badge-do {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-left: 6px;
+    }
+
+    .ref-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    /* Certificate Modal & Print styling */
+    #certificate-area {
+      display: none;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #certificate-area, #certificate-area * {
+        visibility: visible;
+      }
+      #certificate-area {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        background: white;
+      }
+    }
+
+    .cert-frame {
+      border: 8px double #0f172a;
+      border-radius: 12px;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      background: #fff;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .cert-title {
+      font-family: var(--font-heading);
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .cert-sub {
+      font-size: 1.15rem;
+      color: #0284c7;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    .cert-name {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #047857;
+      border-bottom: 2px solid #e2e8f0;
+      display: inline-block;
+      padding: 0 2rem 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .cert-text {
+      font-size: 1.1rem;
+      color: #334155;
+      max-width: 620px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .cert-meta {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 1.5rem;
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    .cert-meta strong {
+      color: #0f172a;
+      display: block;
+      font-size: 1.1rem;
+      margin-top: 4px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.75rem 1rem;
+      color: var(--slate-600);
+      font-size: 0.85rem;
+      background: white;
+      border-top: 1px solid var(--slate-200);
+      margin-top: auto;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .telemetry-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .pulse-wave-pod {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .nav-tabs {
+        justify-content: center;
+      }
+      .case-card {
+        padding: 1.35rem;
+      }
+      .case-narrative {
+        font-size: 1.05rem;
+      }
+      .option-btn {
+        padding: 0.85rem 1rem;
+        font-size: 0.95rem;
+      }
+      .clinical-diagram-card {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Official Disclaimer Banner -->
+  <div class="disclaimer-banner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>
+      <strong>הבהרה קלינית:</strong> סימולטור זה מיועד לתרגול ולהטמעת פרוטוקולים בלבד. בכל מקרה שטח יש לפעול עפ"י נוהלי המוסד וחוזרי מנכ"ל משה"ב ולהזמין נט"ן במיידי.
+      <span class="disclaimer-link" onclick="switchTab('protocols')">צפייה במקורות והנחיות</span>
+    </span>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <div class="logo-area">
+        <div class="pulse-badge">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+        </div>
+        <div class="logo-titles">
+          <h1>סימולטור לידה בחירום</h1>
+          <p>תרגול והטמעת פרוטוקולים קליניים לצוותי סיעוד ומרפאה</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" role="tablist">
+        <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('sim')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 12-4-4v3H3v2h15v3l4-4z"/></svg>
+          סימולטור קליני
+        </button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('protocols')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10M6 14h6"/></svg>
+          מדריך כיס וחוזרי מנכ"ל
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main>
+    
+    <!-- Tab 1: Simulator -->
+    <div id="sim-tab" class="tab-panel active">
+      
+      <!-- Welcome Intro Screen -->
+      <div id="intro-screen" class="intro-card">
+        <div class="intro-badge">
+          <span>🩺</span> סימולציה סיעודית מבוססת תרחישי אמת (10 תרחישים מקיפים)
+        </div>
+        <h2 class="intro-title">ברוכה הבאה לסימולטור לידה בחירום</h2>
+        <p class="intro-text">
+          אירוע לידה או מצב חירום מילדותי במרפאה ראשונית מעמיד את האחות בצומת קריטי של קבלת החלטות מהירות ומצילות חיים.
+          הסימולטור כולל <strong>מוניטור טלמטריה רפואי חי</strong> ו-<strong>10 תרחישי מקרה מקיפים ומגוונים</strong> – כולל שמיטת חבל טבור, כליאת כתפיים (תמרון McRoberts), דימום לאחר לידה (PPH) ואיסורי הברזל.
+        </p>
+
+        <!-- Stats Bar -->
+        <div class="quick-stats">
+          <div class="stat-pill">
+            <div class="stat-icon blue">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="label">זמן מוערך</div>
+              <div class="value">3-4 דקות</div>
+            </div>
+          </div>
+
+          <div class="stat-pill">
+            <div class="stat-icon emerald">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="label">היקף התרגול</div>
+              <div class="value">10 תרחישים מובחנים</div>
+            </div>
+          </div>
+
+          <div class="stat-pill">
+            <div class="stat-icon rose">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="label">דגש קליני</div>
+              <div class="value">Red Flags & איסורים</div>
+            </div>
+          </div>
+
+          <div class="stat-pill">
+            <div class="stat-icon amber">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="label">הישג קודם שמור</div>
+              <div class="value" id="saved-best-score">טרם בוצע</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Settings Box (Name + Timer) -->
+        <div class="sim-options-box">
+          <div class="nurse-name-input-group">
+            <label for="nurse-name" style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">שם האחות המתרגלת:</label>
+            <input type="text" id="nurse-name" class="nurse-name-input" placeholder="שם מלא (עבור תעודת הסיום)" oninput="saveNurseName()">
+          </div>
+
+          <label class="toggle-group">
+            <input type="checkbox" id="timer-toggle">
+            <div>
+              <div class="toggle-label-title">⏱️ מצב לחץ זמן קליני (טיימר 45 שניות לשאלה)</div>
+              <div class="toggle-label-desc">מדמה עומס קבלת החלטות מהיר בזמן אמת</div>
+            </div>
+          </label>
+        </div>
+
+        <button class="start-btn" onclick="startSimulation()">
+          התחילי סימולציה
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+
+      <!-- Active Simulation Screen -->
+      <div id="sim-active-screen" style="display: none;">
+        
+        <!-- Top HUD (Progress + Timer + Score) -->
+        <div class="sim-hud">
+          <div class="hud-progress-info">
+            <div class="hud-label">
+              <span id="case-counter">תרחיש 1 מתוך 10</span>
+              <span id="progress-percent">10%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="progress-bar-fill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div class="timer-badge" id="hud-timer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="timer-val">45s</span>
+          </div>
+
+          <div class="hud-score-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            ניקוד: <span id="current-score">0</span> מתוך 100
+          </div>
+        </div>
+
+        <!-- Case Presentation Card -->
+        <div class="case-card">
+          <div class="case-header">
+            <div class="case-tag-group" id="case-tags">
+              <!-- Dynamically populated -->
+            </div>
+            <span id="nurse-indicator" style="font-size: 0.82rem; font-weight: 700; color: #64748b;">
+              <!-- Nurse Name -->
+            </span>
+          </div>
+
+          <!-- ========================================================
+               HIGH-TECH L&D TELEMETRY MONITOR STRIP
+               ======================================================== -->
+          <div class="telemetry-monitor" aria-label="צג מוניטור עוברי ויולדת">
+            <div class="telemetry-top-bar">
+              <div class="live-status">
+                <span class="live-dot"></span>
+                <span>L&D TELEMETRY • LIVE REAL-TIME</span>
+              </div>
+              <div class="monitor-model-tag">AVALON CTS-400 • WARD EMERGENCY MONITOR</div>
+            </div>
+
+            <div class="telemetry-grid">
+              
+              <!-- Pulse Waveform Card -->
+              <div class="pulse-wave-pod">
+                <div style="font-size: 0.65rem; color: #64748b; font-family: var(--font-mono); margin-bottom: 2px;">
+                  ECG / FHR TRACE
+                </div>
+                <svg class="pulse-svg" viewBox="0 0 140 40">
+                  <path class="pulse-path" d="M0,20 L30,20 L38,10 L44,30 L52,5 L60,35 L66,20 L140,20" />
+                </svg>
+              </div>
+
+              <!-- Pod 1: FHR (Fetal Heart Rate) -->
+              <div class="tele-pod pod-fhr" id="pod-fhr">
+                <div class="tele-pod-header">
+                  <span class="tele-pod-label">FHR דופק עובר</span>
+                  <span class="tele-pod-unit">BPM</span>
+                </div>
+                <div class="tele-pod-value">
+                  <span class="beating-heart">💚</span>
+                  <span id="val-fhr">142</span>
+                </div>
+              </div>
+
+              <!-- Pod 2: TOCO (Uterine Activity / Contractions) -->
+              <div class="tele-pod pod-toco" id="pod-toco">
+                <div class="tele-pod-header">
+                  <span class="tele-pod-label">TOCO צירים</span>
+                  <span class="tele-pod-unit">mmHg</span>
+                </div>
+                <div class="tele-pod-value">
+                  <span id="val-toco">כל 3 דק'</span>
+                </div>
+              </div>
+
+              <!-- Pod 3: MAT NIBP (Maternal Blood Pressure & Heart Rate) -->
+              <div class="tele-pod pod-bp" id="pod-bp">
+                <div class="tele-pod-header">
+                  <span class="tele-pod-label">MAT מדדי אם</span>
+                  <span class="tele-pod-unit">BP / PR</span>
+                </div>
+                <div class="tele-pod-value">
+                  <span id="val-bp">118/75</span>
+                </div>
+              </div>
+
+              <!-- Pod 4: Clinical Status (Amniotic fluid / Bleeding) -->
+              <div class="tele-pod pod-spo2" id="pod-status">
+                <div class="tele-pod-header">
+                  <span class="tele-pod-label">סטטוס מים/דימום</span>
+                  <span class="tele-pod-unit">STATUS</span>
+                </div>
+                <div class="tele-pod-value" style="font-size: 0.95rem;">
+                  <span id="val-status">תקין</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Scenario Question Body -->
+          <div class="case-narrative" id="case-narrative-text">
+            <!-- Question text -->
+          </div>
+
+          <!-- Options List -->
+          <div class="options-list" id="options-container">
+            <!-- Dynamically populated buttons -->
+          </div>
+
+          <!-- Clinical Rationale & Feedback Card -->
+          <div class="rationale-box" id="rationale-container">
+            <div class="rationale-header" id="rationale-title"></div>
+            <div class="rationale-body" id="rationale-text"></div>
+            <div class="clinical-pearl" id="clinical-pearl-text"></div>
+            
+            <!-- Dynamic Clinical Diagram Area -->
+            <div id="diagram-container" style="display: none;"></div>
+          </div>
+
+          <!-- Action bar -->
+          <div class="action-bar" id="action-bar" style="display: none;">
+            <button class="next-btn" id="next-btn" onclick="nextScenario()">
+              התרחיש הבא
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Completion Report Screen -->
+      <div id="report-screen" style="display: none;" class="report-card">
+        <canvas id="confetti-canvas"></canvas>
+
+        <div id="score-circle" class="score-circle excellent">
+          <div class="score-num" id="final-score-val">100</div>
+          <div class="score-label">ציון סופי</div>
+        </div>
+        <h2 class="report-title" id="report-title-text">מוכנות קלינית מצוינת!</h2>
+        <p class="report-msg" id="report-desc-text">
+          הפגנת שליטה מרשימה בפרוטוקולים, בזיהוי דגלים אדומים ובניהול יולדת בחירום.
+        </p>
+
+        <!-- Action Buttons: Certificate & Retry -->
+        <div class="report-actions">
+          <button class="btn-cert" onclick="openCertificateView()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            הפקת תעודת סיום מודפסת (PDF)
+          </button>
+          
+          <button class="btn-retry-mistakes" id="retry-mistakes-btn" style="display: none;" onclick="retryMistakesOnly()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            תרגול שגיאות בלבד
+          </button>
+
+          <button class="start-btn" style="padding: 0.85rem 1.6rem; font-size: 1.05rem;" onclick="restartSimulation()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            תרגול מלא מחדש
+          </button>
+        </div>
+
+        <div class="report-breakdown">
+          <div class="breakdown-title">פירוט ביצועי הסימולציה לפי תרחיש:</div>
+          <div id="breakdown-items-container">
+            <!-- Dynamically generated -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tab 2: Pocket Protocols & Directives Guide -->
+    <div id="protocols-tab" class="tab-panel">
+      <div class="intro-card" style="border-top-color: #059669; padding: 1.75rem 2rem; margin-bottom: 1.5rem;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--slate-900); margin-bottom: 0.5rem;">
+          📋 מדריך כיס מילדותי וחוזרי מנכ"ל משה"ב
+        </h2>
+        <p style="color: var(--slate-600); font-size: 1.05rem;">
+          תמצית כללי הברזל, מוקדי הסיכון וסדרי הפעולות במצבי חירום מילדותיים במרפאה עפ"י הנחיות משרד הבריאות והאיגוד הישראלי למיילדות וגינקולוגיה.
+        </p>
+      </div>
+
+      <div class="protocol-grid">
+        
+        <!-- Card 1: Red Lines -->
+        <div class="protocol-card danger">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            איסורי ברזל במרפאה
+          </h3>
+          <ul>
+            <li>
+              <span class="badge-do-not">איסור חמור</span>
+              <strong>אין לבצע בדיקה וגינלית בדימום!</strong> בדיקה פנימית בנוכחות שליית פתח או הפרדת שליה עלולה להוביל לדימום קטלני תוך דקות.
+            </li>
+            <li>
+              <span class="badge-do-not">איסור חמור</span>
+              <strong>לעולם אין לדחוף ראש תינוק פנימה!</strong> כאשר הראש בולט (Crowing), יש לתמוך בו בעדינות. דחיפת הראש גורמת לקרע ברחם ונזק מוחי.
+            </li>
+            <li>
+              <span class="badge-do-not">איסור חמור</span>
+              <strong>אין להפעיל לחץ פונדלי (Fundal Pressure) בפרע כתפיים!</strong> לחץ מרום הרחם מגביר את כליאת הכתף ועלול לגרום לשיתוק גפה (Erb's Palsy).
+            </li>
+            <li>
+              <span class="badge-do-not">איסור חמור</span>
+              <strong>אין לשלוח יולדת עם צירי לחץ לשירותים!</strong> סכנת נפילת הילוד לאסלה.
+            </li>
+          </ul>
+          <span class="ref-badge">חוזר מינהל הרפואה 12/2018</span>
+        </div>
+
+        <!-- Card 2: Cord Prolapse -->
+        <div class="protocol-card warning">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            שמיטת חבל טבור (Cord Prolapse)
+          </h3>
+          <ul>
+            <li><strong>סימנים:</strong> לולאת חבל טבור מורגשת/נצפית בנרתיק לאחר פקיעת מים, פעימות חבל טבור מהירות/נחלשות.</li>
+            <li><strong>פעולות מצילות חיים:</strong>
+              <br>1. קריאת חירום לנט"ן לקוד 1 (ניתוח קיסרי דחוף).
+              <br>2. <strong>תנוחת Knee-Chest</strong> (ברכיים לחזה) או הטיה חדה שמאלה עם אגן מורם.
+              <br>3. <strong>הרמה ידנית של הראש:</strong> החדרת יד עוטה כפפה סטרילית להדיפת ראש העובר מעל חבל הטבור ללא משיכת החבל.
+              <br>4. כיסוי לולאת החבל החשופה בפדים לחים וחמימים (למניעת התכווצות כלי דם מקור).
+            </li>
+          </ul>
+          <span class="ref-badge">פרוטוקול RCOG & ACOG למצבי חירום מילדותיים</span>
+        </div>
+
+        <!-- Card 3: Shoulder Dystocia -->
+        <div class="protocol-card purple">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            פרע כתפיים (Shoulder Dystocia)
+          </h3>
+          <ul>
+            <li><strong>זיהוי:</strong> 'סימן הצב' (Turtle Sign) – הראש נולד אך נסוג חזרה לפרינאום, והכתפיים תקועות מאחורי עצם הפוביס.</li>
+            <li><strong>אלגוריתם סיעודי:</strong>
+              <br>1. <strong>תמרון McRoberts:</strong> כיפוף והרחקה מקסימלית של ירכי היולדת לעבר בית החזה.
+              <br>2. <strong>לחץ סופרא-פובי (Suprapubic):</strong> הפעלת לחץ אלכסוני ישירות מעל עצם החיק לדחיקת הכתף הקדמית.
+              <br>3. <span class="badge-do-not">איסור מוחלט</span> אין למשוך את הראש בכוח ואין ללחוץ על רום הרחם (Fundus)!
+            </li>
+          </ul>
+          <span class="ref-badge">הנחיות ALSO / PROMPT למיילדות</span>
+        </div>
+
+        <!-- Card 4: PPH Postpartum Hemorrhage -->
+        <div class="protocol-card danger">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            דימום מאסיבי לאחר לידה (PPH)
+          </h3>
+          <ul>
+            <li><strong>אבחנה:</strong> דימום נרתיקי כבד (>500 מ"ל בלידה נרתיקית), רחם רך וספוגי (רפיון שריר הרחם - Uterine Atony).</li>
+            <li><strong>פעולות ראשוניות:</strong>
+              <br>• <strong>עיסוי רחם חיצוני נמרץ:</strong> שפשוף ועיסוי סיבובי של קרקעית הרחם דרך הבטן עד שהוא הופך לכדור קשה.
+              <br>• ריקון שלפוחית שתן (שלפוחית מלאה מונעת התכווצות רחם).
+              <br>• קריאת נט"ן, פתיחת 2 קווי וריד G16/G18 ומתן נוזלים.
+            </li>
+          </ul>
+          <span class="ref-badge">חוזר מנכ"ל משה"ב 23/2012 - מניעה וטיפול ב-PPH</span>
+        </div>
+
+        <!-- Card 5: Placental Abruption -->
+        <div class="protocol-card warning">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            הפרדת שליה (Abruptio Placentae)
+          </h3>
+          <ul>
+            <li><strong>סימנים:</strong> כאב בטן עז ורציף, 'בטן עץ' (רחם נוקשה ומכווץ ללא הפוגות), דימום נרתיקי (גלוי או סמוי).</li>
+            <li><strong>פעולות:</strong> השכבה על צד שמאל, חמצן במסכה 10-15 LPM, הזמנת נט"ן מידית לקוד ניתוח. איסור בדיקה וגינלית!</li>
+          </ul>
+        </div>
+
+        <!-- Card 6: Meconium -->
+        <div class="protocol-card emerald">
+          <h3>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M20 7h-9M14 17H5M17 12H3"/></svg>
+            מים מקוניאליים (Meconium)
+          </h3>
+          <ul>
+            <li><strong>סיכון:</strong> שאיפת מקוניום (MAS) עקב היפוקסיה תוך-רחמית קודמת.</li>
+            <li><strong>היערכות:</strong> הכנת מכשיר שאיבה (סאקשן) פעיל, קטטרים, עמדת חימום יבשה, אמבו יילודים ודופק יילוד רציף.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Printable Certificate Area -->
+  <div id="certificate-area">
+    <div class="cert-frame">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🏅</div>
+      <h1 class="cert-title">תעודת סיום וכשירות קלינית</h1>
+      <div class="cert-sub">סימולציית לידה בחירום ומצבי סיכון מילדותיים במרפאה</div>
+      
+      <p style="font-size: 1.1rem; color: #475569; margin-bottom: 0.5rem;">מוענקת בזאת בהערכה רבה ל:</p>
+      <div class="cert-name" id="cert-nurse-display">האחות המתרגלת</div>
+      
+      <p class="cert-text">
+        על השלמה בהצלחה של תוכנית הסימולציות הקלינית להטמעת פרוטוקולי חירום מילדותיים,
+        הפגנת שיקול דעת סיעודי מציל חיים, שליטה מלאה בחוזרי מנכ"ל משרד הבריאות והקפדה על איסורי הברזל.
+      </p>
+
+      <div class="cert-meta">
+        <div>
+          תאריך הכשרה:
+          <strong id="cert-date-display">--/--/----</strong>
+        </div>
+        <div>
+          ציון סופי:
+          <strong id="cert-score-display">100 / 100</strong>
+        </div>
+        <div>
+          סטטוס כשירות:
+          <strong style="color: #047857;">אושר ועמד בדרישות הסימולציה</strong>
+        </div>
+      </div>
+
+      <div style="margin-top: 2.5rem; display: flex; justify-content: space-between; padding: 0 3rem;">
+        <div style="border-top: 1.5px solid #0f172a; width: 180px; padding-top: 6px; font-weight: 700; font-size: 0.9rem;">
+          מערך הדרכה וסימולציות
+        </div>
+        <div style="border-top: 1.5px solid #0f172a; width: 180px; padding-top: 6px; font-weight: 700; font-size: 0.9rem;">
+          הנהלת הסיעוד
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <strong>סימולטור לידה בחירום למרפאה ולקהילה</strong> • פותח עבור צוותי סיעוד ורפואה • מבוסס פרוטוקולי משרד הבריאות והאיגוד הישראלי למיילדות וגינקולוגיה
+    <br><span style="font-size: 0.78rem; color: #94a3b8;">הערכה קלינית ממוחשבת • כל הזכויות שמורות • לשימוש הדרכתי בלבד</span>
+  </footer>
+
+  <script>
+    /* Complete Set of 10 Distinct Clinical Scenarios with Visual Telemetry Data */
+    const scenarios = [
+      {
+        id: 1,
+        title: "מאי מגיעה למרפאה בשבוע 39+2 עם צירים סדירים כל 4-5 דקות, ללא ירידת מים וללא דימום. באיזה שלב של הלידה היא ככל הנראה נמצאת?",
+        tags: ["הערכת יולדת", "שלבי לידה"],
+        type: "multiple",
+        telemetry: {
+          fhr: "142",
+          toco: "כל 4-5 דק'",
+          bp: "115/75 (PR 78)",
+          status: "מים שלמים • ללא דימום",
+          alert: false
+        },
+        options: [
+          "שלב ראשון פעיל של הלידה",
+          "לידה מתקדמת בשלב שני",
+          "צירים מדומים בלבד (Braxton Hicks)",
+          "לידת בזק מיידית"
+        ],
+        correct: 0,
+        rationale: "צירים סדירים ותכופים (כל 4-5 דקות) בשבוע 39+2 מעידים על תחילת השלב הפעיל של הלידה (פתיחה ומחיקה של צוואר הרחם). היולדת אינה בשלב שני (אין צירי לחץ או ראש בולט), והצירים סדירים מכדי להיות צירים מדומים.",
+        pearl: "💡 פנינה קלינית: במצב זה יש זמן לפינוי מסודר ובטוח באמבולנס לחדר לידה ללא לחץ ופאניקה."
+      },
+      {
+        id: 2,
+        title: "רחלי, היריון רביעי (G4P3) בשבוע 38+5, מגיעה לאחר ירידת מים ועם צירי לחץ תכופים כל 2 דקות. מהו הצעד הראשוני והקריטי ביותר שיש לנקוט לפני הכל?",
+        tags: ["וולדנית רבנית", "הערכה ראשונית"],
+        type: "multiple",
+        telemetry: {
+          fhr: "138",
+          toco: "לחץ כל 2 דק'",
+          bp: "128/82 (PR 94)",
+          status: "מים פקעו • צירי לחץ",
+          alert: true
+        },
+        options: [
+          "ביצוע בדיקה וגינלית פולשנית לבדיקת מחיקה",
+          "הערכה ויזואלית חיצונית בלבד של אזור הפרינאום",
+          "הליכה רגלית לשירותים כדי להתרוקן",
+          "המתנה במרפאה כדי לראות אם הצירים יחלשו"
+        ],
+        correct: 1,
+        rationale: "בוולדנית רבנית (Multipara) עם צירי לחץ תכופים, הלידה עלולה להתרחש תוך דקות בודדות! הצעד הראשון הוא להביט ישירות בפרינאום (Visual Inspection) לבדוק האם הראש כבר מכתיר (Crowing). בדיקה פנימית מיותרת ומעכבת, והליכה לשירותים היא סכנת מוות לנפילת היילוד.",
+        pearl: "💡 פנינה קלינית: יולדת רבנית שאומרת 'אני חייבת לעשות צרכים' עומדת ללדת עכשיו!"
+      },
+      {
+        id: 3,
+        title: "דנה מגיעה בשבוע 40+4 לאחר ירידת מים בצבע ירוק-חום סמיך (מקוניאליים). מה המשמעות הקלינית המרכזית והיערכות הצוות הנדרשת?",
+        tags: ["פתופיזיולוגיה", "מצוקת עובר"],
+        type: "multiple",
+        telemetry: {
+          fhr: "112 (ברדיקרדיה)",
+          toco: "כל 3 דק'",
+          bp: "122/80 (PR 88)",
+          status: "מקוניום סמיך (Pea-soup)",
+          alert: true
+        },
+        options: [
+          "ממצא שפיר ותקין לחלוטין בהיריון עודף",
+          "סיכון מוגבר למצוקת עובר ושאיפת מקוניום (MAS) – מחייב הכנת סאקשן וציוד החייאה",
+          "מעיד אך ורק על התייבשות האם ודורש שתיית נוזלים",
+          "סימן מובהק שהלידה תהיה ארוכה מאוד (מעל 24 שעות)"
+        ],
+        correct: 1,
+        rationale: "יציאת מקוניום נגרמת מרלקסציה של הספינקטר העוברי תחת עקה והיפוקסיה, ועלולה להביא לשאיפת מקוניום לקנה הנשימה (MAS). הדבר דורש יידוע מיידי של מד\"א והכנת ציוד שאיבה (סאקשן) פעיל ועמדת חימום לקבלת הילוד.",
+        pearl: "💡 פנינה קלינית: ככל שהמים סמיכים יותר ('Pea-soup'), גובר הסיכון לחסימת דרכי אוויר של היילוד."
+      },
+      {
+        id: 4,
+        title: "שירה מגיעה בשבוע 34+1 עם דימום נרתיקי אדום טרי וכאב בטן חזק ורציף ('בטן עץ'). מהו האיסור המוחלט ביותר בניהול המקרה שלה במרפאה?",
+        tags: ["איסור קליני", "דימום שליש שלישי"],
+        type: "multiple",
+        telemetry: {
+          fhr: "168 (טכיקרדיה)",
+          toco: "רחם טטאני רציף",
+          bp: "100/60 (PR 110)",
+          status: "דימום אדום טרי + כאב עז",
+          alert: true
+        },
+        options: [
+          "ביצוע בדיקה נרתיקית (ווגינלית)",
+          "השכבה על צד שמאל (Left Lateral Tilt)",
+          "מדידת לחץ דם, דופק וריווי חמצן",
+          "מתן חמצן במסכה בריכוז גבוה"
+        ],
+        correct: 0,
+        rationale: "בדיקה וגינלית (פנימית) במרפאה באישה עם דימום בשליש השלישי היא קונטרה-אינדיקציה מוחלטת! אם מקור הדימום הוא שליית פתח (Placenta Previa) או היפרדות שליה, מגע אצבע עלול לקרוע את השליה ולגרום לדימום קטסטרופלי ומוות האם והעובר תוך דקות.",
+        pearl: "💡 פנינה קלינית: אסור להכניס שום אצבע או ספקולום לנרתיק מדמם ללא אולטרסאונד ששלל שליית פתח בביה\"ח!"
+      },
+      {
+        id: 5,
+        title: "מהו הסימפטום הקליני המרכזי המאפיין את הבטן של אישה הסובלת מהפרדת שליה משמעותית (Abruptio Placentae)?",
+        tags: ["מצבי חירום", "בדיקה גופנית"],
+        type: "multiple",
+        telemetry: {
+          fhr: "155",
+          toco: "כיווץ רציף (בטן עץ)",
+          bp: "105/65 (PR 102)",
+          status: "בטן קשה כקרש",
+          alert: true
+        },
+        options: [
+          "בטן רכה, רפויה וגמישה ללא כאבים",
+          "בטן קשה, רגישה ורציפה ללא הפוגות (המכונה 'בטן עץ')",
+          "צירים סדירים כל 3 דקות עם הפוגות מלאות ורפויות ביניהם",
+          "היעדר מוחלט של כל תחושת כאב בטני"
+        ],
+        correct: 1,
+        rationale: "הפרדת שליה יוצרת דימום סמוי או גלוי שמגרה את שריר הרחם להתכווצות טטאנית ובלתי פוסקת. התוצאה היא רחם רגיש ונוקשה במיוחד שמורגש במישוש כקרש ('בטן עץ').",
+        pearl: "💡 פנינה קלינית: בהפרדת שליה ייתכן דימום רטרו-פלצנטרי סמוי של מעל 1,000 מ\"ל דם בתוך הרחם ללא דימום חיצוני נראה לעין!"
+      },
+      {
+        id: 6,
+        title: "נכון או לא נכון: בלידת בזק במרפאה כאשר הראש כבר בולט (Crowing), על האחות לדחוף את הראש פנימה כדי לעכב את הלידה עד הגעת האמבולנס.",
+        tags: ["איסור חמור", "לידת בזק"],
+        type: "boolean",
+        telemetry: {
+          fhr: "135",
+          toco: "צירי פליטה",
+          bp: "125/80 (PR 92)",
+          status: "ראש מכתיר (Crowing)",
+          alert: false
+        },
+        options: [
+          "נכון",
+          "לא נכון"
+        ],
+        correct: 1,
+        rationale: "איסור חמור בהחלט! לעולם אין לדחוף ראש תינוק בחזרה פנימה. דחיפת הראש עלולה לגרום לקרע קטלני ברחם, נזק מוחי קשה לילוד (היפוקסיה ודימום תוך-גולגולתי) ומוות. יש לתמוך בראש בעדינות כלפי מטה כדי למנוע התפרצות וקרעים בפרינאום.",
+        pearl: "💡 פנינה קלינית: התפקיד הסיעודי הוא ללוות את הלידה בבטחה, לייבש ולחמם את הילוד, ולא לעצור תהליך פיזיולוגי בלתי נמנע."
+      },
+      {
+        id: 7,
+        title: "איזו פעולה סיעודית יש לבצע באופן מיידי עבור אישה הרה בשבוע 34 המציגה סימני שוק, חיוורון ודימום כבד?",
+        tags: ["החייאה וייצוב", "שוק היפוולמי"],
+        type: "multiple",
+        telemetry: {
+          fhr: "172 (מצוקה)",
+          toco: "לא מוגדר",
+          bp: "80/45 (PR 135 ⚠️)",
+          status: "שוק היפוולמי • חיוורון",
+          alert: true
+        },
+        options: [
+          "לתת לה לשתות מים קרים ולשלוח אותה הביתה לנוח",
+          "השכבה על צד שמאל (Left Lateral Tilt), הזמנת נט''ן דחופה ומתן חמצן",
+          "להמתין במרפאה לביצוע אולטרסאונד שגרתי",
+          "הושבה על כיסא רגיל והמתנה לסיום קבלת רופא"
+        ],
+        correct: 1,
+        rationale: "השכבה על צד שמאל (Left Lateral Tilt) מונעת לחץ של הרחם המוגדל על ה-Inferior Vena Cava (מניעת תסמונת ה-Supine Hypotensive Syndrome) ומחזירה תפוקת לב וזרימת דם מוחית. במקביל מזמינים נט\"ן מידית ונותנים חמצן במסכה.",
+        pearl: "💡 פנינה קלינית: כל אישה בהיריון מתקדם עם סימני שוק או עילפון חייבת לקבל הטיה שמאלית של כ-15-30 מעלות!"
+      },
+      {
+        id: 8,
+        title: "תרחיש חירום: מיד לאחר ירידת מים מורגשת ונראית בנרתיק לולאת חבל טבור פועמת (שמיטת חבל טבור - Cord Prolapse). מהי הפעולה המיידית להצלת חיי העובר?",
+        tags: ["שמיטת חבל טבור", "חירום קיצוני"],
+        type: "multiple",
+        telemetry: {
+          fhr: "85 (ברדיקרדיה קשה ⚠️)",
+          toco: "צירים פעילים",
+          bp: "130/85 (PR 108)",
+          status: "חבל טבור צנוח בנרתיק",
+          alert: true
+        },
+        diagram: {
+          title: "דיאגרמה קלינית: שחרור לחץ בשמיטת חבל טבור (Knee-Chest)",
+          desc: "תנוחת ברכיים-חזה (Knee-Chest) מנצלת את כוח הכובד כדי להסיג את משקל העובר מפתח האגן. יד עוטה כפפה סטרילית דוחקת בעדינות את החלק המקדים מעל חבל הטבור ללא משיכת החבל עד להגעה לניתוח קיסרי דחוף.",
+          svg: `<svg viewBox="0 0 130 90" width="100%" height="100%">
+            <!-- Bed/Surface -->
+            <line x1="10" y1="75" x2="120" y2="75" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+            <!-- Body in Knee-Chest: Torso down, Pelvis UP -->
+            <path d="M25,65 Q35,50 55,45 Q75,30 90,32 Q105,35 110,65" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+            <!-- Head down on bed -->
+            <circle cx="20" cy="62" r="9" fill="#38bdf8"/>
+            <!-- Pelvis elevated arrow -->
+            <path d="M85,55 L85,20 M80,26 L85,20 L90,26" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="50" y="86" font-size="8" fill="#047857" font-weight="bold">תנוחת Knee-Chest</text>
+          </svg>`
+        },
+        options: [
+          "לדחוף את חבל הטבור בחזרה לתוך חלל הרחם בכוח",
+          "להעביר מיד לתנוחת ברכיים-חזה (Knee-Chest), להרים ידנית את החלק המקדים ולהזמין נט\"ן בהול",
+          "לחתוך את חבל הטבור מיידית בעזרת מספריים כדי למנוע היחנקות",
+          "לבקש מהיולדת להתחיל ללחוץ בכל הכוח כדי לזרז את הלידה"
+        ],
+        correct: 1,
+        rationale: "שמיטת חבל טבור היא חירום מילדותי עליון! לחץ ראש העובר על חבל הטבור כנגד עצמות האגן מנתק את אספקת החמצן העוברית תוך דקות. תנוחת ברכיים-חזה (או טרנדלנבורג) והרמה ידנית מתמדת של ראש העובר מונעות את מעיכת החבל עד לניתוח קיסרי דחוף.",
+        pearl: "💡 פנינה קלינית: יש לעטוף את הלולאה החיצונית בפדים לחים וחמימים – קור גורם לכיווץ כלי דם בחבל הטבור (Vasospasm)!"
+      },
+      {
+        id: 9,
+        title: "תרחיש לידה: ראש התינוק נולד, אך נסוג חזרה לפרינאום ('סימן הצב') והכתפיים תקועות ללא התקדמות (כליאת כתפיים - Shoulder Dystocia). מהו הצעד הסיעודי הנכון, וממה חובה להימנע?",
+        tags: ["פרע כתפיים", "תמרון McRoberts"],
+        type: "multiple",
+        telemetry: {
+          fhr: "105 (צניחת דופק)",
+          toco: "לחץ מתמשך",
+          bp: "135/88 (PR 115)",
+          status: "כתפיים כלואות (Turtle sign)",
+          alert: true
+        },
+        diagram: {
+          title: "אלגוריתם תמרון McRoberts ולחץ סופרא-פובי",
+          desc: "1. כיפוף והרחקה מקסימלית של ירכי היולדת לחזה (McRoberts) – משטח את הסקרום ומרחיב את האגן. 2. לחץ סופרא-פובי אלכסוני ישירות מעל עצם החיק. ❌ איסור מוחלט על לחץ פונדלי (רום הבטן)!",
+          svg: `<svg viewBox="0 0 130 90" width="100%" height="100%">
+            <!-- Mother silhouette legs up -->
+            <path d="M15,70 Q30,65 50,60 Q70,40 85,25 Q100,45 115,70" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+            <!-- Suprapubic arrow (green) -->
+            <path d="M60,40 L60,56 M56,50 L60,56 L64,50" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Fundal pressure RED X -->
+            <path d="M92,28 L104,40 M104,28 L92,40" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+            <text x="32" y="86" font-size="8" fill="#1e293b" font-weight="bold">McRoberts + Suprapubic</text>
+          </svg>`
+        },
+        options: [
+          "הפעלת לחץ חזק מרום הבטן (Fundal Pressure) ומשיכה בכוח של הראש",
+          "ביצוע תמרון McRoberts (כיפוף והרחקת ירכי היולדת לחזה) יחד עם לחץ סופרא-פובי (Suprapubic)",
+          "משיכת ראש העובר כלפי מטה בזווית חדה כדי לחלצו במהירות",
+          "המתנה רגועה לצירים הבאים ללא התערבות"
+        ],
+        correct: 1,
+        rationale: "תמרון McRoberts משטח את עקומת עמוד השדרה ומרחיב את הקוטר האגני, בעוד שלחץ סופרא-פובי (מעל עצם החיק) דוחק את הכתף הקדמית. איסור מוחלט על לחץ פונדלי (רום הבטן) ואיסור משיכת ראש – פעולות אלו כובלות את הכתף עוד יותר וגורמות לקרע ברחם ולשיתוק זרוע הילוד (Erb's Palsy).",
+        pearl: "💡 פנינה קלינית: זכרו את הכלל – בפרע כתפיים לוחצים מעל הפוביס (Suprapubic), לעולם לא על קרקעית הרחם (Fundus)!"
+      },
+      {
+        id: 10,
+        title: "תרחיש לאחר לידה: לידת בזק הסתיימה, השליה נפלטה בשלמותה אך היולדת ממשיכה לדמם בכבדות מהנרתיק, והרחם מורגש רך ורפוי (Uterine Atony). מהי הפעולה הסיעודית המיידית בשטח?",
+        tags: ["דימום לאחר לידה", "PPH"],
+        type: "multiple",
+        telemetry: {
+          fhr: "N/A (נולד)",
+          toco: "אטוניה (רחם רך)",
+          bp: "90/55 (PR 124 ⚠️)",
+          status: "PPH דימום כבד פעיל",
+          alert: true
+        },
+        diagram: {
+          title: "דיאגרמה קלינית: עיסוי רחם חיצוני נמרץ (Uterine Massage)",
+          desc: "הנחת כף יד תומכת מעל הפוביס ועיסוי סיבובי נמרץ עם היד השנייה על קרקעית הרחם (Fundus) דרך דופן הבטן. העיסוי מעורר כיווץ מכני של סיבי שריר הרחם החוסמים את כלי הדם המדממים במיטת השליה.",
+          svg: `<svg viewBox="0 0 130 90" width="100%" height="100%">
+            <!-- Abdomen contour -->
+            <path d="M20,65 Q60,35 110,65" fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+            <!-- Uterus ball -->
+            <circle cx="65" cy="50" r="18" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="4 2"/>
+            <!-- Massage arrows circular -->
+            <path d="M55,42 A14,14 0 1,1 75,58" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+            <polygon points="75,54 78,62 70,60" fill="#0284c7"/>
+            <text x="35" y="85" font-size="8" fill="#b91c1c" font-weight="bold">עיסוי רחם נמרץ לעצירת PPH</text>
+          </svg>`
+        },
+        options: [
+          "עיסוי רחם חיצוני נמרץ (Uterine Massage) דרך הבטן, ריקון שלפוחית שתן והזמנת נט\"ן",
+          "מתן כדורי אספירין או משככי כאבים והשכבה לנוח",
+          "הנחת חבישת לחץ בתוך הנרתיק והמתנה",
+          "שליחת היולדת להליכה כדי לזרז את התכווצות הרחם"
+        ],
+        correct: 0,
+        rationale: "רפיון שריר הרחם (Uterine Atony) הוא הגורם ל-80% ממקרי הדימום שלאחר לידה (PPH). עיסוי חיצוני מתמיד ונמרץ של קרקעית הרחם דרך דופן הבטן גורם לכיווץ מכני של השריר ולחסימת כלי הדם המדממים. שלפוחית שתן מלאה מפריעה להתכווצות ויש לרוקנה.",
+        pearl: "💡 פנינה קלינית: 'רחם קשה ככדור אינו מדמם' – המשיכי בעיסוי הרחם עד שתרגישי כדור נוקשה ומוגדר היטב!"
+      }
+    ];
+
+    /* State Management */
+    let currentScenarioIndex = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = [];
+    let activeQuestionList = [...scenarios];
+    let isMistakesOnlyMode = false;
+
+    /* Timer state */
+    let timerInterval = null;
+    let timeLeft = 45;
+    let timerEnabled = false;
+
+    /* LocalStorage Init */
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedName = localStorage.getItem('emergency_nurse_name');
+      if (savedName) {
+        document.getElementById('nurse-name').value = savedName;
+      }
+      const bestScore = localStorage.getItem('emergency_best_score');
+      if (bestScore) {
+        document.getElementById('saved-best-score').innerText = `${bestScore} נק'`;
+      }
+    });
+
+    function saveNurseName() {
+      const name = document.getElementById('nurse-name').value.trim();
+      if (name) {
+        localStorage.setItem('emergency_nurse_name', name);
+      }
+    }
+
+    /* Tab Switcher */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      if (tabId === 'sim') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.querySelectorAll('.tab-btn')[0].setAttribute('aria-selected', 'true');
+        document.getElementById('sim-tab').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.querySelectorAll('.tab-btn')[1].setAttribute('aria-selected', 'true');
+        document.getElementById('protocols-tab').classList.add('active');
+      }
+    }
+
+    /* Start Simulation */
+    function startSimulation() {
+      saveNurseName();
+      timerEnabled = document.getElementById('timer-toggle').checked;
+
+      document.getElementById('intro-screen').style.display = 'none';
+      document.getElementById('report-screen').style.display = 'none';
+      document.getElementById('sim-active-screen').style.display = 'block';
+
+      activeQuestionList = [...scenarios];
+      isMistakesOnlyMode = false;
+      currentScenarioIndex = 0;
+      score = 0;
+      userAnswers = [];
+
+      const hudTimer = document.getElementById('hud-timer');
+      hudTimer.style.display = timerEnabled ? 'flex' : 'none';
+
+      renderScenario();
+    }
+
+    /* Timer Functions */
+    function startTimer() {
+      if (!timerEnabled) return;
+      clearInterval(timerInterval);
+      timeLeft = 45;
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeOut();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById('timer-val');
+      const badge = document.getElementById('hud-timer');
+      timerEl.innerText = `${timeLeft}s`;
+
+      if (timeLeft <= 10) {
+        badge.classList.add('urgent');
+      } else {
+        badge.classList.remove('urgent');
+      }
+    }
+
+    function handleTimeOut() {
+      if (answered) return;
+      selectOption(-1, true);
+    }
+
+    /* Render Current Scenario */
+    function renderScenario() {
+      answered = false;
+      const sc = activeQuestionList[currentScenarioIndex];
+
+      // Update HUD
+      const progressPercent = Math.round(((currentScenarioIndex) / activeQuestionList.length) * 100);
+      document.getElementById('case-counter').innerText = `תרחיש ${currentScenarioIndex + 1} מתוך ${activeQuestionList.length}`;
+      document.getElementById('progress-percent').innerText = `${progressPercent}%`;
+      document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
+      document.getElementById('current-score').innerText = score;
+
+      const nurseName = localStorage.getItem('emergency_nurse_name') || '';
+      document.getElementById('nurse-indicator').innerText = nurseName ? `אחות מתרגלת: ${nurseName}` : '';
+
+      // Update Tags
+      const tagsContainer = document.getElementById('case-tags');
+      tagsContainer.innerHTML = '';
+      sc.tags.forEach(t => {
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'case-tag ' + (t.includes('איסור') || t.includes('חירום') || t.includes('שמיטת') ? 'tag-critical' : 'tag-clinical');
+        tagSpan.innerText = t;
+        tagsContainer.appendChild(tagSpan);
+      });
+
+      // Update Telemetry Monitor Values
+      const tele = sc.telemetry;
+      document.getElementById('val-fhr').innerText = tele.fhr;
+      document.getElementById('val-toco').innerText = tele.toco;
+      document.getElementById('val-bp').innerText = tele.bp;
+      document.getElementById('val-status').innerText = tele.status;
+
+      // Toggle alert visual styling on monitor pods
+      const bpPod = document.getElementById('pod-bp');
+      const fhrPod = document.getElementById('pod-fhr');
+      if (tele.alert) {
+        bpPod.classList.add('alert-danger');
+        fhrPod.classList.add('alert-danger');
+      } else {
+        bpPod.classList.remove('alert-danger');
+        fhrPod.classList.remove('alert-danger');
+      }
+
+      // Narrative
+      document.getElementById('case-narrative-text').innerText = sc.title;
+
+      // Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      
+      const letters = ['א', 'ב', 'ג', 'ד'];
+
+      sc.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.onclick = () => selectOption(idx);
+        
+        btn.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+            <div class="option-prefix">${letters[idx] || (idx + 1)}</div>
+            <div class="option-text">${optText}</div>
+          </div>
+          <div class="option-icon-slot"></div>
+        `;
+
+        optionsContainer.appendChild(btn);
+      });
+
+      // Hide Rationale, Diagram and Next button
+      const rationaleBox = document.getElementById('rationale-container');
+      rationaleBox.style.display = 'none';
+      rationaleBox.className = 'rationale-box';
+      document.getElementById('diagram-container').style.display = 'none';
+      document.getElementById('action-bar').style.display = 'none';
+
+      // Start Countdown
+      startTimer();
+    }
+
+    /* Option Selection */
+    function selectOption(selectedIndex, isTimeOut = false) {
+      if (answered) return;
+      answered = true;
+      clearInterval(timerInterval);
+
+      const sc = activeQuestionList[currentScenarioIndex];
+      const isCorrect = selectedIndex === sc.correct;
+      const points = isCorrect ? 10 : 0;
+      score += points;
+
+      userAnswers.push({
+        id: sc.id,
+        title: sc.title,
+        userChoice: isTimeOut ? "אזל הזמן (ללא תשובה)" : sc.options[selectedIndex],
+        correctChoice: sc.options[sc.correct],
+        isCorrect: isCorrect
+      });
+
+      // Update option button styles
+      const buttons = document.querySelectorAll('.option-btn');
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === sc.correct) {
+          btn.classList.add('correct');
+          btn.querySelector('.option-icon-slot').innerHTML = `
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          `;
+        }
+        if (idx === selectedIndex && !isCorrect) {
+          btn.classList.add('wrong');
+          btn.querySelector('.option-icon-slot').innerHTML = `
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          `;
+        }
+      });
+
+      // Show Rationale
+      const rationaleBox = document.getElementById('rationale-container');
+      const titleEl = document.getElementById('rationale-title');
+      const bodyEl = document.getElementById('rationale-text');
+      const pearlEl = document.getElementById('clinical-pearl-text');
+      const diagramEl = document.getElementById('diagram-container');
+
+      if (isCorrect) {
+        rationaleBox.className = 'rationale-box success';
+        titleEl.innerHTML = `
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="16 9 10 15 8 13"/></svg>
+          תשובה נכונה! (+10 נקודות)
+        `;
+      } else {
+        rationaleBox.className = 'rationale-box danger';
+        titleEl.innerHTML = `
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          ${isTimeOut ? 'אזל הזמן לתגובה!' : 'תשובה שגויה - שים לב לפרוטוקול'}
+        `;
+      }
+
+      bodyEl.innerText = sc.rationale;
+      pearlEl.innerText = sc.pearl;
+
+      // Show Diagram if available
+      if (sc.diagram) {
+        diagramEl.innerHTML = `
+          <div class="clinical-diagram-card">
+            <div class="diagram-svg-wrap">
+              ${sc.diagram.svg}
+            </div>
+            <div class="diagram-desc">
+              <strong>${sc.diagram.title}</strong>
+              ${sc.diagram.desc}
+            </div>
+          </div>
+        `;
+        diagramEl.style.display = 'block';
+      } else {
+        diagramEl.style.display = 'none';
+      }
+
+      rationaleBox.style.display = 'block';
+
+      // Update current score HUD
+      document.getElementById('current-score').innerText = score;
+
+      // Show Action Bar
+      document.getElementById('action-bar').style.display = 'flex';
+      const nextBtn = document.getElementById('next-btn');
+      if (currentScenarioIndex === activeQuestionList.length - 1) {
+        nextBtn.innerHTML = `
+          לסיכום תוצאות והפקת תעודה
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+        `;
+      } else {
+        nextBtn.innerHTML = `
+          התרחיש הבא
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        `;
+      }
+    }
+
+    /* Next Scenario / Finish */
+    function nextScenario() {
+      if (currentScenarioIndex < activeQuestionList.length - 1) {
+        currentScenarioIndex++;
+        renderScenario();
+      } else {
+        showReportScreen();
+      }
+    }
+
+    /* Show Final Report & Launch Confetti if score >= 90 */
+    function showReportScreen() {
+      clearInterval(timerInterval);
+      document.getElementById('sim-active-screen').style.display = 'none';
+      document.getElementById('report-screen').style.display = 'block';
+
+      const finalVal = document.getElementById('final-score-val');
+      finalVal.innerText = score;
+
+      // Save Best Score to LocalStorage
+      const prevBest = parseInt(localStorage.getItem('emergency_best_score') || '0', 10);
+      if (score > prevBest) {
+        localStorage.setItem('emergency_best_score', score);
+        document.getElementById('saved-best-score').innerText = `${score} נק'`;
+      }
+
+      const circle = document.getElementById('score-circle');
+      const title = document.getElementById('report-title-text');
+      const desc = document.getElementById('report-desc-text');
+
+      if (score >= 90) {
+        circle.className = 'score-circle excellent';
+        title.innerText = 'שליטה מצוינת בפרוטוקולים! (ציון מצטיין)';
+        desc.innerText = 'הפגנת מוכנות קלינית גבוהה מאוד, יכולת זיהוי מיידית של מקרי חירום קיצוניים ושמירה קפדנית על איסורי הברזל.';
+        triggerConfetti();
+      } else if (score >= 70) {
+        circle.className = 'score-circle good';
+        title.innerText = 'מוכנות טובה מאוד עם נקודות לחיזוק';
+        desc.innerText = 'הבסיס הקליני איתן. מומלץ לעבור על מדריך הכיס וחוזרי המנכ"ל על מנת לדייק את הדגשים הקריטיים והאיסורים.';
+      } else {
+        circle.className = 'score-circle need-review';
+        title.innerText = 'נדרש ריענון של הפרוטוקולים';
+        desc.innerText = 'חלק מההחלטות עלולות לסכן את היולדת או היילוד (בייחוד סביב שמיטת חבל טבור, איסור בדיקה נרתיקית ואיסור דחיפת ראש). מומלץ לתרגל שוב את השגיאות.';
+      }
+
+      // Check if mistakes button should show
+      const hasMistakes = userAnswers.some(a => !a.isCorrect);
+      document.getElementById('retry-mistakes-btn').style.display = hasMistakes ? 'inline-flex' : 'none';
+
+      // Breakdown list
+      const breakdownContainer = document.getElementById('breakdown-items-container');
+      breakdownContainer.innerHTML = '';
+      userAnswers.forEach((ans, i) => {
+        const item = document.createElement('div');
+        item.className = 'breakdown-item';
+        item.innerHTML = `
+          <div class="q-txt">
+            <span style="font-weight: 800; color: #0284c7;">תרחיש ${i + 1}:</span> ${ans.title}
+            <div style="font-size: 0.86rem; color: #64748b; margin-top: 2px;">
+              תשובתך: <span style="font-weight: 700; color: ${ans.isCorrect ? '#059669' : '#dc2626'}">${ans.userChoice}</span>
+              ${!ans.isCorrect ? ` • <span style="color: #059669;">תשובה נכונה: ${ans.correctChoice}</span>` : ''}
+            </div>
+          </div>
+          <div class="q-res ${ans.isCorrect ? 'pass' : 'fail'}">
+            ${ans.isCorrect ? '✓ נכון (+10)' : '✗ שגוי (0)'}
+          </div>
+        `;
+        breakdownContainer.appendChild(item);
+      });
+    }
+
+    /* Retry Mistakes Only Mode */
+    function retryMistakesOnly() {
+      const wrongIds = userAnswers.filter(a => !a.isCorrect).map(a => a.id);
+      activeQuestionList = scenarios.filter(s => wrongIds.includes(s.id));
+      isMistakesOnlyMode = true;
+      currentScenarioIndex = 0;
+      score = 0;
+      userAnswers = [];
+
+      document.getElementById('report-screen').style.display = 'none';
+      document.getElementById('sim-active-screen').style.display = 'block';
+      renderScenario();
+    }
+
+    /* Restart Full Simulation */
+    function restartSimulation() {
+      startSimulation();
+    }
+
+    /* Certificate Generator */
+    function openCertificateView() {
+      const nurseName = localStorage.getItem('emergency_nurse_name') || 'האחות המתרגלת';
+      document.getElementById('cert-nurse-display').innerText = nurseName;
+      document.getElementById('cert-score-display').innerText = `${score} מתוך 100`;
+
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+      document.getElementById('cert-date-display').innerText = dateStr;
+
+      // Trigger print dialogue
+      window.print();
+    }
+
+    /* Lightweight Canvas Confetti */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+
+      const particles = [];
+      const colors = ['#0284c7', '#10b981', '#38bdf8', '#f59e0b', '#ec4899', '#6366f1'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 3,
+          vx: (Math.random() - 0.5) * 12,
+          vy: (Math.random() - 0.7) * 12,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frames = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.22; // gravity
+          p.rotation += p.rotSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        frames++;
+        if (frames < 140) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+  </script>
+</body>
+</html>
